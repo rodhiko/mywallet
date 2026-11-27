@@ -72,10 +72,7 @@ nav button.on,nav button.on span{color:#0f1b1b}
 .cal{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-top:10px;text-align:center}.cal span{font-size:12px;font-weight:700;color:var(--mut)}.dy{font:inherit;font-weight:700;aspect-ratio:1;border:2px solid transparent;border-radius:10px;background:none;color:var(--ink);cursor:pointer;padding:0}.dy.td{border-color:var(--ink)}.dy.on{background:var(--pri);color:var(--on);border-color:var(--ink)}
 .tg{display:grid;grid-template-columns:repeat(6,1fr);gap:6px;margin-top:6px}.tg button{font:inherit;font-weight:700;padding:8px 0;border:2px solid var(--ink);border-radius:10px;background:var(--card);color:var(--ink);cursor:pointer}.tg button.on{background:var(--pri);color:var(--on)}
 b[data-mv]{display:inline-block}.tl{font-size:10px}.dtl{font-weight:700;font-size:13px}
-@media(prefers-reduced-motion:no-preference){.pp{animation:pp .28s ease-out}@keyframes pp{from{opacity:0;transform:scale(.9)}}}
 .lock{justify-items:center}.lock input{width:200px}.prof{display:flex;gap:14px;align-items:center;text-align:left;font:inherit;cursor:pointer;width:min(320px,86vw);margin:0}.prof:active{transform:translate(3px,3px);box-shadow:none}.av{width:44px;height:44px;border-radius:50%;border:3px solid var(--ink);display:grid;place-items:center;font-weight:700;font-size:20px;background:rgba(255,255,255,.55);flex:none}
-@media(prefers-reduced-motion:no-preference){#view.in>*{animation:rise .38s cubic-bezier(.2,.8,.2,1) both}#view.in>*:nth-child(2){animation-delay:.05s}#view.in>*:nth-child(3){animation-delay:.1s}#view.in>*:nth-child(4){animation-delay:.14s}#view.in>*:nth-child(n+5){animation-delay:.18s}@keyframes rise{from{opacity:0;transform:translateY(14px)}}}
-@media(prefers-reduced-motion:no-preference){.ov .sh{animation:up .18s ease-out}@keyframes up{from{transform:translateY(40px)}}}
 </style></head>
 <body><div id="app"></div>
 <script>
@@ -85,7 +82,7 @@ const svg=(m,s=22,w=2)=>`<svg width="${s}" height="${s}" viewBox="0 0 24 24" fil
 const COLORS=['#FF7AA2','#B79CED','#8FD694','#7CB9FF','#FF9F7A','#FFD93D','#FFB347','#5BC0BE','#FF8FD8','#6FCF97','#9AA5FF','#F2A65A'],METH=['Cash','Transfer','QRIS','Card'];
 const defCats=()=>[['Leisure','fun','#FF7AA2'],['Family','family','#B79CED'],['Groceries','cart','#8FD694'],['Transport','car','#7CB9FF'],['Health','heart','#FF9F7A'],['Shopping','bag','#FFD93D'],['Gifts','gift','#FF8FD8'],['Food','food','#FFB347'],['Other','dots','#C4C4C4']].map(c=>({id:'e'+c[0],name:c[0],icon:c[1],color:c[2],t:'e'})).concat([['Salary','coin','#5BC0BE'],['Bonus','star','#8FD694'],['Other','dots','#C4C4C4']].map(c=>({id:'i'+c[0],name:c[0],icon:c[1],color:c[2],t:'i'})));
 const D={tx:[],budgets:{},goals:[],acc:null,cats:null,rem:[],pin:null};
-let S=null,R={u:{}},me=null,pend=null,ready=false,shell=false,anim=false,catEdit=false,OV={},trk='6m',ref=null,view='overview',show=false,catT='e',timer,where='This device only';
+let S=null,R={u:{}},me=null,pend=null,ready=false,shell=false,catEdit=false,OV={},trk='6m',view='overview',show=false,catT='e',timer,where='This device only';
 try{const t=localStorage.getItem('dk_theme');if(t)document.documentElement.dataset.theme=t}catch(e){}
 const isDark=()=>{const t=document.documentElement.dataset.theme;return t?t=='dark':!!(window.matchMedia&&matchMedia('(prefers-color-scheme: dark)').matches)};
 const setTheme=t=>{document.documentElement.dataset.theme=t;try{localStorage.setItem('dk_theme',t)}catch(e){}};
@@ -97,7 +94,6 @@ const rp=n=>(n<0?'-':'')+'Rp '+Math.abs(Math.round(n)).toLocaleString('id-ID'),m
 const pad=n=>String(n).padStart(2,'0'),iso=d=>d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate()),td=()=>iso(new Date());
 const uid=()=>Math.random().toString(36).slice(2,9),sum=(a,t)=>a.filter(x=>x.t==t).reduce((s,x)=>s+x.a,0);
 const fd=d=>new Date(d+'T00:00').toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'});
-const opt=(a,s)=>a.map(v=>`<option ${v==s?'selected':''}>${esc(v)}</option>`).join('');
 const catOf=id=>S.cats.find(c=>c.id==id)||{name:'Deleted',icon:'dots',color:'#ccc',t:'e'},accOf=id=>S.acc.find(a=>a.id==id)||{name:'Deleted'};
 const chip=(c,z)=>`<div class="dot" style="background:${c.color};${z?'width:28px;height:28px;border-radius:9px;border-width:2px':''}">${svg(ICO[c.icon]||ICO.dots,z?16:22)}</div>`;
 const accBal=a=>a.bal+S.tx.filter(x=>x.w==a.id).reduce((s,x)=>s+(x.t=='i'?x.a:-x.a),0);
@@ -117,33 +113,26 @@ function migrate(){
 }
 const API_URL='https://script.google.com/macros/s/AKfycbyL9ulXWnGp3EcB9oA4FUlJG8OJl5MWL_sfRnEUYyjnqKjHL8yFTJYGmj-xBrZPcU7adw/exec';
 const hasApi=()=>API_URL&&API_URL.startsWith('https://');
-let apiKey='',keyErr='';
-try{apiKey=localStorage.getItem('dk_key')||''}catch(e){}
-const setApiKey=k=>{apiKey=(k||'').trim();try{if(apiKey)localStorage.setItem('dk_key',apiKey);else localStorage.removeItem('dk_key')}catch(e){}};
 async function load(){
   let L=null;try{L=JSON.parse(localStorage.getItem('dk')||'null')}catch(e){}
-  if(hasApi()&&apiKey){
+  if(hasApi()){
     try{
-      const res=await fetch(API_URL+'?action=load&key='+encodeURIComponent(apiKey));
+      const res=await fetch(API_URL+'?action=load');
       const j=await res.json();
-      if(j&&j.ok){keyErr='';if(j.state)L=j.state;where='Saved to Google Sheets'}
-      else{
-        const msg=(j&&j.error)||'Load failed';
-        if(/Unauthorized/i.test(msg)){keyErr='Kunci akses salah. Silakan masukkan ulang.';setApiKey('');ready=true;render();return}
-        throw new Error(msg);
-      }
+      if(j&&j.ok){if(j.state)L=j.state;where='Saved to Google Sheets'}
+      else throw new Error((j&&j.error)||'Load failed');
     }catch(e){where='Offline, saved on this device'}
-  }else if(!hasApi()){where='Set API_URL in index.html'}
+  }else{where='Set API_URL in index.html'}
   R=(L&&L.u)?L:{u:L?{rodhi:L}:{}};ready=true;render();
 }
 function save(){try{localStorage.setItem('dk',JSON.stringify(R))}catch(e){}
-  clearTimeout(timer);timer=setTimeout(async()=>{if(!me||!hasApi()||!apiKey)return;
+  clearTimeout(timer);timer=setTimeout(async()=>{if(!me||!hasApi())return;
     try{
-      const res=await fetch(API_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action:'save',key:apiKey,id:me,data:S})});
+      const res=await fetch(API_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action:'save',id:me,data:S})});
       const j=await res.json();
-      if(j&&j.ok){if(where!='Saved to Google Sheets'){where='Saved to Google Sheets';render()}}
+      if(j&&j.ok){if(where!='Saved to Google Sheets'){where='Saved to Google Sheets';updateStatus()}}
       else throw new Error((j&&j.error)||'Save failed');
-    }catch(e){where='Sheet save failed, kept on this device';render()}
+    }catch(e){if(where!='Sheet save failed, kept on this device'){where='Sheet save failed, kept on this device';updateStatus()}}
   },600)}
 
 /* ---------- period filter ---------- */
@@ -153,21 +142,20 @@ function inP(d,p){const t=td();if(p.k=='today')return d==t;if(p.k=='day')return 
 const perUI=k=>`<div class="row" style="margin-bottom:12px">${selBtn(`data-act="per" data-k="${k}"`,PER.find(p=>p[0]==P[k].k)[1])}${P[k].k=='day'?selBtn(`data-act="perday" data-k="${k}"`,fd(P[k].d||td())):''}</div>`;
 
 /* ---------- views ---------- */
-function enter(u){me=u;S=Object.assign(JSON.parse(JSON.stringify(D)),R.u[u]||{});R.u[u]=S;migrate();pend=null;view='overview';show=false;shell=false;anim=true;save();render();checkDue()}
+function enter(u){me=u;S=Object.assign(JSON.parse(JSON.stringify(D)),R.u[u]||{});R.u[u]=S;migrate();pend=null;view='overview';show=false;shell=false;save();render();checkDue()}
 function loginHTML(){
   const logo=`<h1 class="logo" style="font-size:26px"><i>${svg(NAV.accounts,17)}</i>MyWallet</h1>`;
-  if(hasApi()&&!apiKey)return`<div class="lock">${logo}<p>Masukkan Kunci Akses Keluarga</p><p class="mut" style="max-width:280px">Cukup diisi sekali di perangkat ini untuk menyambung ke Google Sheets.</p><input id="akey" type="password" style="width:240px;font-size:16px;letter-spacing:2px" placeholder="Secret Key" autocomplete="off"><button class="b pri" data-act="savekey">Hubungkan</button><p class="err" id="kerr">${esc(keyErr)}</p></div>`;
   if(!ready)return`<div class="lock">${logo}<p class="mut">Loading your data…</p></div>`;
   if(pend){const p=PROF.find(x=>x.id==pend);return`<div class="lock">${logo}<p>Hi ${p.name}, enter your PIN</p><input id="pin" type="password" inputmode="numeric" maxlength="6" autocomplete="off" aria-label="PIN"><button class="b pri" data-act="unlock">Unlock</button><button class="b" data-act="back">Back</button><p class="err" id="perr"></p></div>`}
-  return`<div class="lock">${logo}<p class="mut">Who is using MyWallet?</p>${PROF.map(p=>`<button class="card prof ${p.g}" data-act="login" data-u="${p.id}"><span class="av">${p.name[0]}</span><span><b>${p.name}</b><br><span class="mut">${p.role}</span></span></button>`).join('')}${hasApi()?'<button class="b sm" data-act="resetkey" style="margin-top:8px">Ganti Kunci Akses</button>':''}</div>`}
+  return`<div class="lock">${logo}<p class="mut">Who is using MyWallet?</p>${PROF.map(p=>`<button class="card prof ${p.g}" data-act="login" data-u="${p.id}"><span class="av">${p.name[0]}</span><span><b>${p.name}</b><br><span class="mut">${p.role}</span></span></button>`).join('')}</div>`}
+function updateStatus(){const st=$('#substatus');if(st&&me)st.textContent=PROF.find(p=>p.id==me).name+' · '+where}
 function render(){
   if(!me){shell=false;app.innerHTML=loginHTML();return}
   if(!shell){app.innerHTML=`<div class="top" id="top"></div><div id="view"></div><div class="fade"></div><button class="fab" data-act="add" aria-label="Add transaction">${svg(NAV.plus,28,3)}</button><nav id="nav"><i class="hl" id="hl"></i>${TABS.map(k=>`<button data-act="tab" data-k="${k}" aria-label="${k}">${svg(NAV[k],22)}<span>${k[0].toUpperCase()+k.slice(1)}</span></button>`).join('')}</nav>`;shell=true}
-  $('#top').innerHTML=`<div><h1 class="logo"><i>${svg(NAV.accounts,17)}</i>MyWallet</h1><div class="dtl" style="margin-top:4px">${new Date().toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long',year:'numeric'})}</div><div class="mut">${esc(PROF.find(p=>p.id==me).name)} · ${esc(where)}</div></div><div class="row"><button class="b ib" data-act="theme" aria-label="Switch theme">${svg(isDark()?NAV.sun:NAV.moon,20)}</button><button class="b ib" data-act="tab" data-k="settings" aria-label="Reminders and settings">${svg(NAV.bell,20)}</button></div>`;
+  $('#top').innerHTML=`<div><h1 class="logo"><i>${svg(NAV.accounts,17)}</i>MyWallet</h1><div class="dtl" style="margin-top:4px">${new Date().toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long',year:'numeric'})}</div><div class="mut" id="substatus">${esc(PROF.find(p=>p.id==me).name)} · ${esc(where)}</div></div><div class="row"><button class="b ib" data-act="theme" aria-label="Switch theme">${svg(isDark()?NAV.sun:NAV.moon,20)}</button><button class="b ib" data-act="tab" data-k="settings" aria-label="Reminders and settings">${svg(NAV.bell,20)}</button></div>`;
   const v=$('#view');v.innerHTML=({overview,transactions:txv,categories:catv,budget:budv,accounts:accv,settings:setv})[view]();
   const i=TABS.indexOf(view);document.querySelectorAll('#nav button').forEach((b,n)=>b.classList.toggle('on',n==i));
   const h=$('#hl');h.style.opacity=i<0?0:1;h.style.transform='translateX('+Math.max(i,0)*100+'%)';
-  if(anim){anim=false;v.classList.remove('in');void v.offsetWidth;v.classList.add('in')}
 }
 function mvCat(id,d){const i=S.cats.findIndex(c=>c.id==id),t=S.cats[i].t;let j=i+d;while(j>=0&&j<S.cats.length&&S.cats[j].t!=t)j+=d;if(j<0||j>=S.cats.length)return;[S.cats[i],S.cats[j]]=[S.cats[j],S.cats[i]];save();render()}
 function row(x){const c=catOf(x.c);return`<div class="tx" data-act="edit" data-id="${x.id}">${chip(c)}<div class="m"><b>${esc(c.name)}${x.n?' · '+esc(x.n):''}</b><span class="mut">${fd(x.d)} · ${esc(accOf(x.w).name)} · ${esc(x.m)}</span></div><b class="${x.t=='e'?'neg':'posi'}">${x.t=='e'?'-':'+'}${rp(x.a)}</b></div>`}
@@ -271,18 +259,16 @@ const remSheet=r=>sheet(r?'Edit reminder':'New reminder',[{id:'title',l:'Title',
 /* ---------- actions ---------- */
 document.addEventListener('click',async e=>{
   const el=e.target.closest('[data-act]');if(!el||e.target.closest('.ov'))return;const a=el.dataset.act,id=el.dataset.id;
-  if(a=='savekey'){const v=($('#akey').value||'').trim();if(!v){$('#kerr').textContent='Masukkan kunci akses.';return}setApiKey(v);ready=false;render();load();return}
-  if(a=='resetkey'){setApiKey('');keyErr='';render();return}
   if(a=='login'){pend=el.dataset.u;if(!(R.u[pend]||{}).pin)enter(pend);else render();return}
   if(a=='back'){pend=null;render();return}
   if(a=='unlock'){if(await hash($('#pin').value)==(R.u[pend]||{}).pin)enter(pend);else $('#perr').textContent='Wrong PIN. Try again.';return}
-  if(a=='tab'){if(view!=el.dataset.k){view=el.dataset.k;anim=true;window.scrollTo(0,0);render()}}
+  if(a=='tab'){if(view!=el.dataset.k){view=el.dataset.k;window.scrollTo(0,0);render()}}
   else if(a=='theme'){setTheme(isDark()?'light':'dark');render()}
   else if(a=='catEdit'){catEdit=!catEdit;render()}
   else if(a=='catadd')txSheet(null,id);
   else if(a=='catup')mvCat(id,-1);
   else if(a=='catdown')mvCat(id,1);
-  else if(a=='eye'){show=!show;document.querySelectorAll('[data-mv]').forEach(n=>{n.textContent=mv(OV[n.dataset.mv]||0);n.classList.remove('pp');void n.offsetWidth;n.classList.add('pp')});const h=$('[data-hint]');if(h)h.textContent='Tap to '+(show?'hide':'show')}
+  else if(a=='eye'){show=!show;document.querySelectorAll('[data-mv]').forEach(n=>{n.textContent=mv(OV[n.dataset.mv]||0)});const h=$('[data-hint]');if(h)h.textContent='Tap to '+(show?'hide':'show')}
   else if(a=='per')pickSel('Period',PER,P[el.dataset.k].k,v=>{P[el.dataset.k].k=v;render()});
   else if(a=='perday')pickDate(P[el.dataset.k].d||td(),d=>{P[el.dataset.k].d=d;render()});
   else if(a=='flt'){const f=el.dataset.f,o=f=='t'?[['','All types'],['e','Expense'],['i','Income']]:f=='w'?[['','All accounts'],...accItems()]:[['','All categories'],...catItems()];pickSel({t:'Type',w:'Account',c:'Category'}[f],o,flt[f],v=>{flt[f]=v;render()})}
@@ -308,8 +294,8 @@ document.addEventListener('click',async e=>{
     try{const blob=new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8;'}),url=URL.createObjectURL(blob),dl=document.createElement('a');dl.href=url;dl.download='MyWallet_'+me+'_'+td()+'.csv';document.body.appendChild(dl);dl.click();setTimeout(()=>{dl.remove();URL.revokeObjectURL(url)},1000)}catch(x){try{sheet('Copy CSV data',[{id:'c',l:'Copy this text and paste it into Google Sheets or a file',v:csv}],()=>{})}catch(y){}}}
 });
 document.addEventListener('input',e=>{const d=e.target.dataset;if(d.f){flt[d.f]=e.target.value;$('#txl').innerHTML=txlist()}});
-document.addEventListener('keydown',e=>{if(e.key=='Enter'&&!me){const b=document.querySelector('[data-act="unlock"],[data-act="savekey"]');if(b)b.click()}});
+document.addEventListener('keydown',e=>{if(e.key=='Enter'&&!me){const b=document.querySelector('[data-act="unlock"]');if(b)b.click()}});
 function checkDue(){dueList().forEach(r=>{if(!r.n&&'Notification' in window&&Notification.permission=='granted'){try{new Notification('MyWallet',{body:(r.t=='e'?'Time to pay: ':'Income: ')+r.title})}catch(x){}r.n=1;save()}})}
-setInterval(()=>{checkDue();if(me&&view=='overview'&&!document.querySelector('.ov'))render()},30000);
+setInterval(()=>{checkDue();if(me&&view=='overview'&&!document.querySelector('.ov')){const v=$('#view');if(v)v.innerHTML=overview()}},30000);
 render();load();
 </script></body></html>
