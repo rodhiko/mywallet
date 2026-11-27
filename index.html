@@ -115,7 +115,7 @@ function migrate(){
   S.tx.forEach(x=>{if(!S.cats.some(c=>c.id==x.c)){const c=S.cats.find(c=>c.name==x.c&&c.t==x.t)||S.cats.find(c=>c.name=='Other'&&c.t==x.t)||S.cats[0];x.c=c.id}if(!S.acc.some(a=>a.id==x.w))x.w=(S.acc.find(a=>a.name==x.w)||S.acc[0]).id});
   Object.keys(S.budgets).forEach(k=>{if(!S.cats.some(c=>c.id==k)){if(S.cats.some(c=>c.id=='e'+k)&&!S.budgets['e'+k])S.budgets['e'+k]=S.budgets[k];delete S.budgets[k]}});
 }
-const API_URL='PASTE_WEB_APP_URL_KAMU_DI_SINI';
+const API_URL='https://script.google.com/macros/s/AKfycbyL9ulXWnGp3EcB9oA4FUlJG8OJl5MWL_sfRnEUYyjnqKjHL8yFTJYGmj-xBrZPcU7adw/exec';
 const hasApi=()=>API_URL&&API_URL.startsWith('https://');
 let apiKey='',keyErr='';
 try{apiKey=localStorage.getItem('dk_key')||''}catch(e){}
