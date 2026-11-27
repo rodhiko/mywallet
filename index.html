@@ -54,7 +54,7 @@ label{display:block;margin:10px 0 0;font-weight:700;font-size:13px}label input,l
 .pie{display:block;margin:6px auto 12px;max-width:230px}
 .pk{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px}.pk button{width:44px;height:44px;border:3px solid var(--ink);border-radius:12px;background:var(--card);color:var(--ink);display:grid;place-items:center;padding:0;cursor:pointer}.pk button.on{background:var(--yel);color:var(--on);box-shadow:3px 3px 0 var(--ink)}
 .pk.cl button{border-radius:50%}
-.kp{display:grid;grid-template-columns:repeat(5,1fr);gap:5px;margin-top:8px}.kp button{font:inherit;font-weight:700;font-size:15px;padding:6px 0;background:var(--card);color:var(--ink);border:2px solid var(--ink);border-radius:10px;box-shadow:2px 2px 0 var(--ink);cursor:pointer}.kp button.op{background:var(--yel);color:var(--on)}.kp button.eq{background:var(--pri);color:var(--on)}
+.kp{display:grid;grid-template-columns:repeat(5,1fr);gap:5px;margin-top:8px}.kp button{font:inherit;font-weight:700;font-size:15px;line-height:1;height:38px;padding:0;display:flex;align-items:center;justify-content:center;text-align:center;background:var(--card);color:var(--ink);border:2px solid var(--ink);border-radius:10px;box-shadow:2px 2px 0 var(--ink);cursor:pointer}.kp button.op{background:var(--yel);color:var(--on)}.kp button.eq{background:var(--pri);color:var(--on)}
 .fade{position:fixed;left:0;right:0;bottom:0;height:calc(120px + env(safe-area-inset-bottom,0px));z-index:4;pointer-events:none;background:linear-gradient(to top,var(--bg) 20%,transparent);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);-webkit-mask-image:linear-gradient(to top,#000 45%,transparent);mask-image:linear-gradient(to top,#000 45%,transparent)}
 nav{position:fixed;left:50%;transform:translateX(-50%);width:calc(100% - 28px);max-width:452px;bottom:calc(16px + env(safe-area-inset-bottom,0px));background:var(--card);border:3px solid var(--ink);border-radius:24px;box-shadow:5px 5px 0 var(--ink);padding:4px;z-index:6;display:grid;grid-template-columns:repeat(5,1fr)}
 nav button{position:relative;z-index:1;font:inherit;font-size:clamp(8px,2.4vw,11px);font-weight:700;white-space:nowrap;background:none;border:0;color:var(--ink);padding:7px 0;cursor:pointer;display:grid;justify-items:center;gap:3px;transition:color .15s .1s}
@@ -115,7 +115,7 @@ function migrate(){
   S.tx.forEach(x=>{if(!S.cats.some(c=>c.id==x.c)){const c=S.cats.find(c=>c.name==x.c&&c.t==x.t)||S.cats.find(c=>c.name=='Other'&&c.t==x.t)||S.cats[0];x.c=c.id}if(!S.acc.some(a=>a.id==x.w))x.w=(S.acc.find(a=>a.name==x.w)||S.acc[0]).id});
   Object.keys(S.budgets).forEach(k=>{if(!S.cats.some(c=>c.id==k)){if(S.cats.some(c=>c.id=='e'+k)&&!S.budgets['e'+k])S.budgets['e'+k]=S.budgets[k];delete S.budgets[k]}});
 }
-const API_URL='https://script.google.com/macros/s/AKfycbyL9ulXWnGp3EcB9oA4FUlJG8OJl5MWL_sfRnEUYyjnqKjHL8yFTJYGmj-xBrZPcU7adw/exec';
+const API_URL='PASTE_WEB_APP_URL_KAMU_DI_SINI';
 const hasApi=()=>API_URL&&API_URL.startsWith('https://');
 let apiKey='',keyErr='';
 try{apiKey=localStorage.getItem('dk_key')||''}catch(e){}
@@ -304,8 +304,8 @@ document.addEventListener('click',async e=>{
   else if(a=='notif'){try{await Notification.requestPermission()}catch(x){}render()}
   else if(a=='pin')sheet('App PIN',[{id:'p',l:'New PIN (4 to 6 digits), empty to remove',k:'password'}],async v=>{if(!v.p){S.pin=null;return}if(!/^\d{4,6}$/.test(v.p))return'PIN must be 4 to 6 digits.';S.pin=await hash(v.p)});
   else if(a=='lock'){me=null;S=null;pend=null;show=false;render()}
-  else if(a=='export'){const q=s=>'"'+String(s).replace(/"/g,'""')+'"',csv='Date,Type,Category,Amount,Account,Method,Note\n'+[...S.tx].sort((a,b)=>a.d.localeCompare(b.d)).map(x=>[x.d,x.t=='e'?'Expense':'Income',catOf(x.c).name,x.a,accOf(x.w).name,x.m,x.n].map(q).join(',')).join('\n');
-    try{sheet('Copy CSV data',[{id:'c',l:'Copy this text and paste it into Google Sheets or a file',v:csv}],()=>{})}catch(x){}}
+  else if(a=='export'){const q=s=>'"'+String(s==null?'':s).replace(/"/g,'""')+'"',csv='Date,Type,Category,Amount,Account,Method,Note\r\n'+[...S.tx].sort((a,b)=>a.d.localeCompare(b.d)).map(x=>[x.d,x.t=='e'?'Expense':'Income',catOf(x.c).name,x.a,accOf(x.w).name,x.m,x.n].map(q).join(',')).join('\r\n');
+    try{const blob=new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8;'}),url=URL.createObjectURL(blob),dl=document.createElement('a');dl.href=url;dl.download='MyWallet_'+me+'_'+td()+'.csv';document.body.appendChild(dl);dl.click();setTimeout(()=>{dl.remove();URL.revokeObjectURL(url)},1000)}catch(x){try{sheet('Copy CSV data',[{id:'c',l:'Copy this text and paste it into Google Sheets or a file',v:csv}],()=>{})}catch(y){}}}
 });
 document.addEventListener('input',e=>{const d=e.target.dataset;if(d.f){flt[d.f]=e.target.value;$('#txl').innerHTML=txlist()}});
 document.addEventListener('keydown',e=>{if(e.key=='Enter'&&!me){const b=document.querySelector('[data-act="unlock"],[data-act="savekey"]');if(b)b.click()}});
