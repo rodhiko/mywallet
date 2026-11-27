@@ -127,12 +127,19 @@ async function load(){
 }
 function save(){try{localStorage.setItem('dk',JSON.stringify(R))}catch(e){}
   clearTimeout(timer);timer=setTimeout(async()=>{if(!me||!hasApi())return;
+    const payload=JSON.stringify(S);
     try{
-      const res=await fetch(API_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action:'save',id:me,data:S})});
-      const j=await res.json();
-      if(j&&j.ok){if(where!='Saved to Google Sheets'){where='Saved to Google Sheets';updateStatus()}}
-      else throw new Error((j&&j.error)||'Save failed');
-    }catch(e){if(where!='Sheet save failed, kept on this device'){where='Sheet save failed, kept on this device';updateStatus()}}
+      if(payload.length<6000){
+        const res=await fetch(API_URL+'?action=save&id='+encodeURIComponent(me)+'&data='+encodeURIComponent(payload));
+        const j=await res.json();
+        if(!j||!j.ok)throw new Error((j&&j.error)||'Save failed');
+      }else{
+        await fetch(API_URL,{method:'POST',mode:'no-cors',body:JSON.stringify({action:'save',id:me,data:S})});
+      }
+      if(where!='Saved to Google Sheets'){where='Saved to Google Sheets';updateStatus()}
+    }catch(e){
+      where='Sheet save failed: '+(e.message||'error');updateStatus()
+    }
   },600)}
 
 /* ---------- period filter ---------- */
